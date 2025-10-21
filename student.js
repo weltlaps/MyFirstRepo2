@@ -1,102 +1,84 @@
-const http = require('http');
-// Student data
+// Student data and functions
 const students = [
 { id: 1, name: 'John Doe', age: 20, grade: 'A', email: 'john@school.com' },
 { id: 2, name: 'Jane Smith', age: 21, grade: 'B', email: 'jane@school.com' },
-{ id: 3, name: 'Mike Johnson', age: 19, grade: 'A', email: 'mike@school.com' },
+{ id: 3, name: 'Mike Johnson', age: 19, grade: 'A', email: 'invalid-email' }, // BAD EMAIL - will
+cause test to fail
 { id: 4, name: 'Sarah Wilson', age: 22, grade: 'C', email: 'sarah@school.com' }
 ];
-const server = http.createServer((req, res) => {
-if (req.url === '/' && req.method === 'GET') {
-res.writeHead(200, { 'Content-Type': 'text/html' });
-const html = `
-<!DOCTYPE html>
-<html>
-<head>
-<title>Student Profiles - Version 1</title>
-<style>
-body {
-font-family: Arial, sans-serif;
-margin: 40px;
-background-color: #f5f5f5;
+// Email validation function
+function isValidEmail(email) {
+// Check if email has @ and . and proper format
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+return emailRegex.test(email);
 }
-.container {
-max-width: 800px;
-margin: 0 auto;
-background: white;
-padding: 20px;
-border-radius: 10px;
-box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-h1 {
-color: #2e7d32; /* Green color */
-text-align: center;
-margin-bottom: 30px;
-}
-.student-table {
-width: 100%;
-border-collapse: collapse;
-margin-top: 20px;
-}
-.student-table th {
-background-color: #4caf50; /* Green header */
-color: white;
-padding: 12px;
-text-align: left;
-}
-.student-table td {
-padding: 12px;
-border-bottom: 1px solid #ddd;
-}
-.student-table tr:hover {
-background-color: #e8f5e8; /* Light green hover */
-}
-.version {
-text-align: center;
-color: #2e7d32;
-margin-top: 20px;
-font-weight: bold;
-}
-</style>
-</head>
-<body>
-<div class="container">
-<h1>Student Profiles</h1>
-<table class="student-table">
-<thead>
-<tr>
-<th>ID</th>
-<th>Name</th>
-<th>Age</th>
-<th>Grade</th>
-<th>Email</th>
-</tr>
-</thead>
-<tbody>
-${students.map(student => `
-<tr>
-<td>${student.id}</td>
-<td>${student.name}</td>
-<td>${student.age}</td>
-<td>${student.grade}</td>
-<td>${student.email}</td>
-</tr>
-`).join('')}
-</tbody>
-</table>
-<div class="version">Version 1.0 - Green Theme</div>
-</div>
-</body>
-</html>
-`;
-res.end(html);
-} else {
-res.writeHead(404, { 'Content-Type': 'text/plain' });
-res.end('Page not found');
+// Validate all student emails
+function validateAllEmails() {
+const invalidStudents = [];
+students.forEach(student => {
+if (!isValidEmail(student.email)) {
+invalidStudents.push({
+id: student.id,
+name: student.name,
+email: student.email
+});
 }
 });
-const PORT = 3000;
-server.listen(PORT, () => {
-console.log(`Student Profile app running on http://localhost:${PORT}`);
-console.log('Theme: Green (Version 1)');
-});
+return invalidStudents;
+}
+// Get all students
+function getAllStudents() {
+return students;
+}
+// Get student by ID
+function getStudentById(id) {
+const student = students.find(s => s.id === id);
+if (!student) {
+throw new Error('Student not found');
+}
+return student;
+}
+// Get students by grade
+function getStudentsByGrade(grade) {
+return students.filter(s => s.grade === grade);
+}
+// Calculate average age
+function getAverageAge() {
+if (students.length === 0) return 0;
+const sum = students.reduce((acc, s) => acc + s.age, 0);
+return sum / students.length;
+}
+// Get grade distribution
+function getGradeDistribution() {
+return students.reduce((acc, student) => {
+acc[student.grade] = (acc[student.grade] || 0) + 1;
+return acc;
+}, {});
+}
+// Add a new student with validation
+function addStudent(name, age, grade, email) {
+// Validate email before adding
+if (!isValidEmail(email)) {
+throw new Error('Invalid email address');
+}
+const newStudent = {
+id: students.length + 1,
+name,
+age,
+grade,
+email
+};
+students.push(newStudent);
+return newStudent;
+}
+module.exports = {
+students,
+getAllStudents,
+getStudentById,
+getStudentsByGrade,
+getAverageAge,
+getGradeDistribution,
+addStudent,
+isValidEmail,
+validateAllEmails
+};
