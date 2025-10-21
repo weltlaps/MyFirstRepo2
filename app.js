@@ -5,7 +5,7 @@ getStudentById,
 getStudentsByGrade,
 getAverageAge,
 getGradeDistribution
-} = require('./student');
+} = require('./students');
 // Create server
 function createServer() {
 return http.createServer((req, res) => {
